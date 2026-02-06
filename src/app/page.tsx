@@ -167,10 +167,14 @@ export default function Page() {
             transition={{ duration: 0.6, delay: 1.2 }}
             className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4"
           >
-            <button className="bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors">
+            <a 
+              href="/api/cv/download"
+              target="_blank"
+              className="bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors"
+            >
               <Download size={20} />
               Download CV
-            </button>
+            </a>
             <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors">
               <Linkedin size={20} />
               LinkedIn

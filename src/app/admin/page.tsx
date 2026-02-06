@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
-import { FolderOpen, Briefcase, GraduationCap, Code, LogOut, Plus } from 'lucide-react';
+import { FolderOpen, Briefcase, GraduationCap, Code, LogOut, Plus, FileText } from 'lucide-react';
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -31,6 +31,7 @@ export default function AdminDashboard() {
     { name: 'Experience', icon: Briefcase, color: '#90e0ef', path: '/admin/experience' },
     { name: 'Education', icon: GraduationCap, color: '#48cae4', path: '/admin/education' },
     { name: 'Skills', icon: Code, color: '#0096c7', path: '/admin/skills' },
+    { name: 'CV Manager', icon: FileText, color: '#0077b6', path: '/admin/cv' },
   ];
 
   return (
@@ -61,7 +62,7 @@ export default function AdminDashboard() {
         >
           <h2 className="text-3xl font-bold mb-8">Manage Portfolio Content</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
             {sections.map((section, index) => (
               <motion.a
                 key={section.name}
