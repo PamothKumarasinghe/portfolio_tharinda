@@ -127,10 +127,15 @@ export default function App() {
               <Download size={20} />
               Download CV
             </button>
-            <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors">
+            <a
+              href="https://www.linkedin.com/in/tharinda-abeywardana-97304b1b8/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors"
+            >
               <Linkedin size={20} />
               LinkedIn
-            </button>
+            </a>
           </motion.div>
         </div>
       </section>
@@ -182,7 +187,7 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-3 text-sm sm:text-base text-gray-400">
                   <Mail size={20} className="text-[#00b4d8] flex-shrink-0" />
-                  <span className="break-all">rr45389@gmail.com</span>
+                  <span className="break-all">tharindacw2804@gmail.com</span>
                 </div>
               </div>
             </motion.div>
@@ -426,7 +431,7 @@ export default function App() {
                   </div>
                   <div>
                     <div className="text-xs sm:text-sm text-gray-500 mb-1">Email</div>
-                    <div className="text-base sm:text-lg break-all">rr45389@gmail.com</div>
+                    <div className="text-base sm:text-lg break-all">tharindacw2804@gmail.com</div>
                   </div>
                 </div>
                 
@@ -440,7 +445,12 @@ export default function App() {
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 sm:gap-4">
+                <a
+                  href="https://www.linkedin.com/in/tharinda-abeywardana-97304b1b8/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 sm:gap-4 hover:opacity-80 transition-opacity"
+                >
                   <div className="bg-[#00b4d8]/20 p-3 rounded-lg flex-shrink-0">
                     <Linkedin size={24} className="text-[#00b4d8]" />
                   </div>
@@ -448,7 +458,7 @@ export default function App() {
                     <div className="text-xs sm:text-sm text-gray-500 mb-1">LinkedIn</div>
                     <div className="text-base sm:text-lg">Connect with me</div>
                   </div>
-                </div>
+                </a>
               </div>
             </motion.div>
             
@@ -468,7 +478,7 @@ export default function App() {
               
               <div className="space-y-4">
                 <a
-                  href="mailto:rr45389@gmail.com"
+                  href="mailto:tharindacw2804@gmail.com"
                   className="w-full bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
                 >
                   <Mail size={24} className="group-hover:scale-110 transition-transform" />
@@ -476,7 +486,7 @@ export default function App() {
                 </a>
                 
                 <a
-                  href="https://wa.me/94742614052"
+                  href="https://wa.me/94743633248"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"

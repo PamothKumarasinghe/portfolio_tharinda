@@ -5,12 +5,18 @@ import { motion, useInView, useAnimation } from 'motion/react';
 import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, User, Menu, X, ArrowRight, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Project as ProjectType } from '@/lib/types';
+import type { Project as ProjectType, SkillCategory as SkillCategoryType, Experience, Education } from '@/lib/types';
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
+  const [skillCategories, setSkillCategories] = useState<SkillCategoryType[]>([]);
+  const [loadingSkills, setLoadingSkills] = useState(true);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
+  const [loadingExperiences, setLoadingExperiences] = useState(true);
+  const [education, setEducation] = useState<Education[]>([]);
+  const [loadingEducation, setLoadingEducation] = useState(true);
 
   useEffect(() => {
     // Fetch recent 4 projects from API
@@ -28,7 +34,56 @@ export default function Page() {
       }
     };
 
+    // Fetch first 4 skill categories from API
+    const fetchSkills = async () => {
+      try {
+        const res = await fetch('/api/skills');
+        const data = await res.json();
+        if (data.success) {
+          // Show only first 4 skill categories
+          setSkillCategories(data.data.slice(0, 4));
+        }
+      } catch (error) {
+        console.error('Failed to fetch skills:', error);
+      } finally {
+        setLoadingSkills(false);
+      }
+    };
+
+    // Fetch experiences from API
+    const fetchExperiences = async () => {
+      try {
+        const res = await fetch('/api/experiences');
+        const data = await res.json();
+        if (data.success) {
+          setExperiences(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch experiences:', error);
+      } finally {
+        setLoadingExperiences(false);
+      }
+    };
+
+    // Fetch education from API
+    const fetchEducation = async () => {
+      try {
+        const res = await fetch('/api/education');
+        const data = await res.json();
+        if (data.success) {
+          setEducation(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch education:', error);
+      } finally {
+        setLoadingEducation(false);
+      }
+    };
+
     fetchProjects();
+    fetchSkills();
+    fetchExperiences();
+    fetchEducation();
   }, []);
 
 
@@ -157,10 +212,15 @@ export default function Page() {
               <Download size={20} />
               Download CV
             </a>
-            <button className="bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors">
+            <a
+              href="https://www.linkedin.com/in/tharinda-abeywardana-97304b1b8/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="bg-gray-800 hover:bg-gray-700 text-white px-6 sm:px-8 py-3 rounded-md flex items-center justify-center gap-2 transition-colors"
+            >
               <Linkedin size={20} />
               LinkedIn
-            </button>
+            </a>
           </motion.div>
         </div>
       </section>
@@ -220,7 +280,7 @@ export default function Page() {
                 </div>
                 <div className="flex items-center gap-3 text-sm sm:text-base text-gray-400">
                   <Mail size={20} className="text-[#00b4d8] flex-shrink-0" />
-                  <span className="break-all">rr45389@gmail.com</span>
+                  <span className="break-all">tharindacw2804@gmail.com</span>
                 </div>
               </div>
             </motion.div>
@@ -243,59 +303,46 @@ export default function Page() {
             <div className="w-24 h-1 bg-[#00b4d8] mx-auto mb-12 sm:mb-16"></div>
           </motion.div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
-            {/* Programming */}
-            <SkillCategory
-              icon={<Code size={24} className="text-[#00b4d8]" />}
-              title="Programming"
-              skills={[
-                { name: 'Python', percentage: 85 },
-                { name: 'C/C++', percentage: 80 },
-                { name: 'JavaScript', percentage: 75 },
-                { name: 'MATLAB', percentage: 70 }
-              ]}
-              delay={0.2}
-            />
-
-            {/* Hardware */}
-            <SkillCategory
-              icon={<Cpu size={24} className="text-[#00b4d8]" />}
-              title="Hardware"
-              skills={[
-                { name: 'Arduino', percentage: 90 },
-                { name: 'Raspberry Pi', percentage: 85 },
-                { name: 'FPGA', percentage: 70 },
-                { name: 'PCB Design', percentage: 75 }
-              ]}
-              delay={0.3}
-            />
-
-            {/* Tools */}
-            <SkillCategory
-              icon={<Wrench size={24} className="text-[#00b4d8]" />}
-              title="Tools"
-              skills={[
-                { name: 'Git', percentage: 80 },
-                { name: 'Linux', percentage: 75 },
-                { name: 'VS Code', percentage: 85 },
-                { name: 'Docker', percentage: 65 }
-              ]}
-              delay={0.4}
-            />
-
-            {/* Technologies */}
-            <SkillCategory
-              icon={<Database size={24} className="text-[#00b4d8]" />}
-              title="Technologies"
-              skills={[
-                { name: 'IoT', percentage: 85 },
-                { name: 'Signal Processing', percentage: 80 },
-                { name: 'Machine Learning', percentage: 70 },
-                { name: 'Embedded Systems', percentage: 90 }
-              ]}
-              delay={0.5}
-            />
-          </div>
+          {loadingSkills ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-[#00b4d8]/30 border-t-[#00b4d8] rounded-full animate-spin"></div>
+            </div>
+          ) : skillCategories.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">No skills data available.</p>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                {skillCategories.map((category, index) => (
+                  <SkillCategory
+                    key={category._id}
+                    icon={getIconComponent(category.icon)}
+                    title={category.title}
+                    skills={category.skills}
+                    delay={0.2 + index * 0.1}
+                  />
+                ))}
+              </div>
+              
+              {/* View More Button */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.6 }}
+                viewport={{ once: true }}
+                className="mt-12 text-center"
+              >
+                <Link
+                  href="/skills"
+                  className="inline-flex items-center gap-2 bg-[#00b4d8] hover:bg-[#0096b8] text-white px-8 py-3 rounded-lg transition-colors group"
+                >
+                  <span>View All Skills</span>
+                  <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </motion.div>
+            </>
+          )}
         </div>
       </AnimatedSection>
 
@@ -376,27 +423,30 @@ export default function Page() {
             <div className="w-24 h-1 bg-[#00b4d8] mx-auto mb-12 sm:mb-16"></div>
           </motion.div>
           
-          <div className="relative pl-6 sm:pl-8 border-l-2 border-gray-700">
-            <TimelineItem
-              title="Embedded Systems Intern"
-              company="Tech Innovations Ltd"
-              description="Worked on developing firmware for IoT devices, participated in PCB design reviews, and assisted in testing embedded systems."
-              date="Jun 2024 - Aug 2024"
-              location="Colombo, Sri Lanka"
-              current={false}
-              delay={0.2}
-            />
-            
-            <TimelineItem
-              title="Research Assistant"
-              company="University Research Lab"
-              description="Conducting research on wireless communication systems, implementing signal processing algorithms, and publishing research papers."
-              date="Jan 2024 - Present"
-              location="Moratuwa, Sri Lanka"
-              current={true}
-              delay={0.4}
-            />
-          </div>
+          {loadingExperiences ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-[#00b4d8]/30 border-t-[#00b4d8] rounded-full animate-spin"></div>
+            </div>
+          ) : experiences.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">No work experience data available.</p>
+            </div>
+          ) : (
+            <div className="relative pl-6 sm:pl-8 border-l-2 border-gray-700">
+              {experiences.map((experience, index) => (
+                <TimelineItem
+                  key={experience._id}
+                  title={experience.title}
+                  company={experience.company}
+                  description={experience.description}
+                  date={experience.date}
+                  location={experience.location}
+                  current={experience.current}
+                  delay={0.2 + index * 0.2}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </AnimatedSection>
 
@@ -415,29 +465,31 @@ export default function Page() {
             <div className="w-24 h-1 bg-[#00b4d8] mx-auto mb-12 sm:mb-16"></div>
           </motion.div>
           
-          <div className="relative pl-6 sm:pl-8 border-l-2 border-gray-700">
-            <EducationItem
-              degree="Bachelor of Science in Engineering"
-              field="Electronic & Telecommunication Engineering"
-              institution="University of Moratuwa"
-              achievements="Dean's List 2022, 2023 • Member of IEEE Student Branch • Active participant in robotics competitions"
-              date="2021 - Present"
-              location="Moratuwa, Sri Lanka"
-              current={true}
-              delay={0.2}
-            />
-            
-            <EducationItem
-              degree="G.C.E. Advanced Level"
-              field="Physical Science Stream"
-              institution="Royal College"
-              achievements="District Rank: Top 50 • Science Olympiad Medalist • School Colors for Science"
-              date="2018 - 2020"
-              location="Colombo, Sri Lanka"
-              current={false}
-              delay={0.4}
-            />
-          </div>
+          {loadingEducation ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-[#00b4d8]/30 border-t-[#00b4d8] rounded-full animate-spin"></div>
+            </div>
+          ) : education.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">No education data available.</p>
+            </div>
+          ) : (
+            <div className="relative pl-6 sm:pl-8 border-l-2 border-gray-700">
+              {education.map((edu, index) => (
+                <EducationItem
+                  key={edu._id}
+                  degree={edu.degree}
+                  field={edu.field}
+                  institution={edu.institution}
+                  achievements={edu.achievements}
+                  date={edu.date}
+                  location={edu.location}
+                  current={edu.current}
+                  delay={0.2 + index * 0.2}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </AnimatedSection>
 
@@ -475,7 +527,7 @@ export default function Page() {
                   </div>
                   <div>
                     <div className="text-xs sm:text-sm text-gray-500 mb-1">Email</div>
-                    <div className="text-base sm:text-lg break-all">rr45389@gmail.com</div>
+                    <div className="text-base sm:text-lg break-all">tharindacw2804@gmail.com</div>
                   </div>
                 </div>
                 
@@ -489,7 +541,12 @@ export default function Page() {
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-3 sm:gap-4">
+                <a
+                  href="https://www.linkedin.com/in/tharinda-abeywardana-97304b1b8/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-start gap-3 sm:gap-4 hover:opacity-80 transition-opacity"
+                >
                   <div className="bg-[#00b4d8]/20 p-3 rounded-lg flex-shrink-0">
                     <Linkedin size={24} className="text-[#00b4d8]" />
                   </div>
@@ -497,7 +554,7 @@ export default function Page() {
                     <div className="text-xs sm:text-sm text-gray-500 mb-1">LinkedIn</div>
                     <div className="text-base sm:text-lg">Connect with me</div>
                   </div>
-                </div>
+                </a>
               </div>
             </motion.div>
             
@@ -517,7 +574,7 @@ export default function Page() {
               
               <div className="space-y-4">
                 <a
-                  href="mailto:rr45389@gmail.com"
+                  href="mailto:tharindacw2804@gmail.com"
                   className="w-full bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
                 >
                   <Mail size={24} className="group-hover:scale-110 transition-transform" />
@@ -525,7 +582,7 @@ export default function Page() {
                 </a>
                 
                 <a
-                  href="https://wa.me/94742614052"
+                  href="https://wa.me/94743633248"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
@@ -546,6 +603,18 @@ export default function Page() {
       </AnimatedSection>
     </div>
   );
+}
+
+// Helper function to get icon component from icon name
+function getIconComponent(iconName: string) {
+  const icons: { [key: string]: any } = {
+    'Code': Code,
+    'Cpu': Cpu,
+    'Wrench': Wrench,
+    'Database': Database,
+  };
+  const IconComponent = icons[iconName] || Code;
+  return <IconComponent size={24} className="text-[#00b4d8]" />;
 }
 
 // Animated Section Wrapper

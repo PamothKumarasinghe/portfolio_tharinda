@@ -227,8 +227,12 @@ export default function AdminSkills() {
                 <input
                   type="number"
                   min="1"
-                  value={formData.order}
-                  onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) })}
+                  value={formData.order || ''}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    const numValue = value === '' ? 1 : parseInt(value);
+                    setFormData({ ...formData, order: isNaN(numValue) ? 1 : numValue });
+                  }}
                   className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8]"
                 />
               </div>
@@ -278,8 +282,12 @@ export default function AdminSkills() {
                       type="number"
                       min="0"
                       max="100"
-                      value={skillInput.percentage}
-                      onChange={(e) => setSkillInput({ ...skillInput, percentage: parseInt(e.target.value) })}
+                      value={skillInput.percentage || ''}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const numValue = value === '' ? 0 : parseInt(value);
+                        setSkillInput({ ...skillInput, percentage: isNaN(numValue) ? 0 : numValue });
+                      }}
                       placeholder="%"
                       className="w-20 bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-2 focus:outline-none focus:border-[#00b4d8]"
                     />

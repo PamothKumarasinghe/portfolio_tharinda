@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Plus, Edit, Trash2, ArrowLeft, Save, X, ExternalLink, Github } from 'lucide-react';
 import Image from 'next/image';
+import { ImageUpload } from '@/app/components/ImageUpload';
 
 interface Project {
   _id?: string;
@@ -207,14 +208,16 @@ export default function AdminProjects() {
               </div>
 
               <div>
-                <label className="block text-sm mb-2">Image URL *</label>
-                <input
-                  type="text"
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                  placeholder="/projects/project1.jpg"
-                  className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8]"
-                  required
+                <ImageUpload
+                  currentImage={formData.image}
+                  onImageUploaded={(url, publicId) => {
+                    setFormData({ 
+                      ...formData, 
+                      image: url,
+                    });
+                  }}
+                  folder="portfolio/projects"
+                  label="Project Image *"
                 />
               </div>
 
