@@ -2,18 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useAnimation } from 'motion/react';
-import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, Send, User, Menu, X, ArrowRight } from 'lucide-react';
+import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, User, Menu, X, ArrowRight, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Project as ProjectType } from '@/lib/types';
 
 export default function Page() {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    subject: '',
-    message: ''
-  });
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [projects, setProjects] = useState<ProjectType[]>([]);
   const [loadingProjects, setLoadingProjects] = useState(true);
@@ -37,19 +31,7 @@ export default function Page() {
     fetchProjects();
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log('Form submitted:', formData);
-    // Handle form submission here
-    alert('Message sent! (Demo)');
-  };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -234,7 +216,7 @@ export default function Page() {
                 </div>
                 <div className="flex items-center gap-3 text-sm sm:text-base text-gray-400">
                   <Mail size={20} className="text-[#00b4d8] flex-shrink-0" />
-                  <span className="break-all">tharinda@example.com</span>
+                  <span className="break-all">rr45389@gmail.com</span>
                 </div>
               </div>
             </motion.div>
@@ -489,7 +471,7 @@ export default function Page() {
                   </div>
                   <div>
                     <div className="text-xs sm:text-sm text-gray-500 mb-1">Email</div>
-                    <div className="text-base sm:text-lg break-all">tharinda@example.com</div>
+                    <div className="text-base sm:text-lg break-all">rr45389@gmail.com</div>
                   </div>
                 </div>
                 
@@ -520,73 +502,40 @@ export default function Page() {
               whileInView={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
+              className="space-y-6"
             >
-              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label htmlFor="name" className="block text-sm mb-2">Name</label>
-                    <input
-                      type="text"
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      placeholder="Your name"
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8] transition-colors text-sm sm:text-base"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm mb-2">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="your@email.com"
-                      className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8] transition-colors text-sm sm:text-base"
-                      required
-                    />
-                  </div>
-                </div>
-                
-                <div>
-                  <label htmlFor="subject" className="block text-sm mb-2">Subject</label>
-                  <input
-                    type="text"
-                    id="subject"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleChange}
-                    placeholder="What's this about?"
-                    className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8] transition-colors text-sm sm:text-base"
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <label htmlFor="message" className="block text-sm mb-2">Message</label>
-                  <textarea
-                    id="message"
-                    name="message"
-                    value={formData.message}
-                    onChange={handleChange}
-                    placeholder="Your message..."
-                    rows={5}
-                    className="w-full bg-gray-800/50 border border-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8] transition-colors resize-none text-sm sm:text-base"
-                    required
-                  />
-                </div>
-                
-                <button
-                  type="submit"
-                  className="w-full bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-3 rounded-lg flex items-center justify-center gap-2 transition-colors"
+              <div>
+                <h3 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Quick Contact</h3>
+                <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 leading-relaxed">
+                  Choose your preferred way to reach out. I'll get back to you as soon as possible!
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <a
+                  href="mailto:rr45389@gmail.com"
+                  className="w-full bg-[#00b4d8] hover:bg-[#0096b8] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
                 >
-                  <Send size={20} />
-                  Send Message
-                </button>
-              </form>
+                  <Mail size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-lg font-semibold">Send Email</span>
+                </a>
+                
+                <a
+                  href="https://wa.me/94742614052"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
+                >
+                  <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
+                  <span className="text-lg font-semibold">WhatsApp Chat</span>
+                </a>
+              </div>
+              
+              <div className="mt-8 p-6 bg-gradient-to-br from-gray-800/30 to-gray-900/30 rounded-2xl border border-gray-700/30">
+                <p className="text-sm text-gray-400 text-center">
+                  <strong className="text-white">Response Time:</strong> Usually within 24 hours
+                </p>
+              </div>
             </motion.div>
           </div>
         </div>
