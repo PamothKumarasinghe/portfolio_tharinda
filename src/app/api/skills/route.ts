@@ -4,6 +4,7 @@ import { SkillCategory } from '@/lib/types';
 import { requireAuth } from '@/lib/auth';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 import { validate, skillSchema, skillCategorySchema } from '@/lib/validation';
+import { deleteFromCloudinary, extractPublicId } from '@/lib/cloudinary';
 
 // GET all skill categories
 export async function GET(request: NextRequest) {
@@ -128,13 +129,35 @@ export async function PUT(request: NextRequest) {
       );
     }
 
-    const updateData = validation.data;
+    const updateData = validation.data as typeof validation.data & object;
     
     if (!_id) {
       return NextResponse.json(
         { success: false, error: 'Skill category ID is required' },
         { status: 400 }
       );
+    }
+    
+    // If icon is being updated, delete the old one from Cloudinary
+    if (updateData?.icon && updateData.icon.includes('cloudinary.com')) {
+      const existingCategory = await db.collection<SkillCategory>('skills').findOne({
+        _id: new (require('mongodb').ObjectId)(_id)
+      });
+      
+      if (existingCategory && existingCategory.icon && 
+          existingCategory.icon.includes('cloudinary.com') && 
+          existingCategory.icon !== updateData.icon) {
+        const oldPublicId = extractPublicId(existingCategory.icon);
+        if (oldPublicId) {
+          try {
+            await deleteFromCloudinary(oldPublicId);
+            console.log(`Deleted old icon from Cloudinary: ${oldPublicId}`);
+          } catch (error) {
+            console.error('Error deleting old icon from Cloudinary:', error);
+            // Continue with update even if Cloudinary delete fails
+          }
+        }
+      }
     }
     
     const result = await db.collection('skills').updateOne(
@@ -192,16 +215,36 @@ export async function DELETE(request: NextRequest) {
       );
     }
     
-    const result = await db.collection('skills').deleteOne({
+    // Fetch the skill category first to get icon URL for Cloudinary cleanup
+    const skillCategory = await db.collection<SkillCategory>('skills').findOne({
       _id: new (require('mongodb').ObjectId)(id)
     });
     
-    if (result.deletedCount === 0) {
+    if (!skillCategory) {
       return NextResponse.json(
         { success: false, error: 'Skill category not found' },
         { status: 404 }
       );
     }
+    
+    // Delete icon from Cloudinary if it exists and is a Cloudinary URL
+    if (skillCategory.icon && skillCategory.icon.includes('cloudinary.com')) {
+      const publicId = extractPublicId(skillCategory.icon);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId);
+          console.log(`Deleted icon from Cloudinary: ${publicId}`);
+        } catch (error) {
+          console.error('Error deleting icon from Cloudinary:', error);
+          // Continue with deletion even if Cloudinary fails
+        }
+      }
+    }
+    
+    // Delete skill category from database
+    const result = await db.collection('skills').deleteOne({
+      _id: new (require('mongodb').ObjectId)(id)
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {

@@ -25,6 +25,7 @@ export default function AdminProjects() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [tagsInput, setTagsInput] = useState(''); // Raw tag input string
   const [formData, setFormData] = useState<Project>({
     title: '',
     description: '',
@@ -60,12 +61,19 @@ export default function AdminProjects() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Process tags from input string
+    const processedTags = tagsInput
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+    
     const url = editingId ? '/api/projects' : '/api/projects';
     const method = editingId ? 'PUT' : 'POST';
     
     // Ensure optional fields are empty strings, not undefined
     const payload = {
       ...formData,
+      tags: processedTags,
       githubUrl: formData.githubUrl || '',
       liveUrl: formData.liveUrl || '',
       ...(editingId && { _id: editingId })
@@ -100,6 +108,7 @@ export default function AdminProjects() {
 
   const handleEdit = (project: Project) => {
     setFormData(project);
+    setTagsInput(project.tags.join(', ')); // Set tags input string
     setEditingId(project._id || null);
     setShowForm(true);
   };
@@ -133,6 +142,7 @@ export default function AdminProjects() {
       liveUrl: '',
       featured: false,
     });
+    setTagsInput(''); // Reset tags input
   };
 
   const handleCancel = () => {
@@ -211,15 +221,21 @@ export default function AdminProjects() {
                 <label className="block text-sm mb-2">Tags (comma separated) *</label>
                 <input
                   type="text"
-                  value={formData.tags.join(', ')}
-                  onChange={(e) => setFormData({ 
-                    ...formData, 
-                    tags: e.target.value.split(',').map(t => t.trim()).filter(t => t.length > 0) 
-                  })}
+                  value={tagsInput}
+                  onChange={(e) => setTagsInput(e.target.value)}
                   placeholder="React, Node.js, MongoDB"
                   className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8]"
                   required
                 />
+                {tagsInput && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {tagsInput.split(',').map(t => t.trim()).filter(t => t.length > 0).map((tag, idx) => (
+                      <span key={idx} className="text-xs bg-[#00b4d8]/20 text-[#00b4d8] px-2 py-1 rounded">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>

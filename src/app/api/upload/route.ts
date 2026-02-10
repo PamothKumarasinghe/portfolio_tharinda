@@ -3,6 +3,10 @@ import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
 import { requireAuth } from '@/lib/auth';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 
+// Configure route segment
+export const maxDuration = 60; // 60 seconds timeout for this route
+export const dynamic = 'force-dynamic';
+
 // POST - Upload image (PROTECTED)
 export async function POST(request: NextRequest) {
   try {
@@ -57,20 +61,34 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    // Upload to Cloudinary
-    const result = await uploadToCloudinary(buffer, folder);
+    // Upload to Cloudinary with timeout handling
+    try {
+      const result = await uploadToCloudinary(buffer, folder);
 
-    return NextResponse.json({
-      success: true,
-      url: result.secure_url,
-      publicId: result.public_id,
-      width: result.width,
-      height: result.height,
-    });
-  } catch (error) {
+      return NextResponse.json({
+        success: true,
+        url: result.secure_url,
+        publicId: result.public_id,
+        width: result.width,
+        height: result.height,
+      });
+    } catch (uploadError: any) {
+      console.error('Upload error:', uploadError);
+      
+      // Check if it's a timeout error
+      if (uploadError.message?.includes('timeout') || uploadError.http_code === 499) {
+        return NextResponse.json(
+          { error: 'Upload timeout. Please try again with a smaller file or check your internet connection.' },
+          { status: 408 }
+        );
+      }
+      
+      throw uploadError;
+    }
+  } catch (error: any) {
     console.error('Upload error:', error);
     return NextResponse.json(
-      { error: 'Failed to upload image' },
+      { error: error.message || 'Failed to upload image' },
       { status: 500 }
     );
   }

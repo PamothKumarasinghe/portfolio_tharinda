@@ -9,6 +9,13 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // API route configuration
+  experimental: {
+    // Increase body size limit for file uploads (10MB)
+    serverActions: {
+      bodySizeLimit: '10mb',
+    },
+  },
   // Security headers
   async headers() {
     return [

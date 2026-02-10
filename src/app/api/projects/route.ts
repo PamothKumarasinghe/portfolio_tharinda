@@ -4,6 +4,7 @@ import { Project } from '@/lib/types';
 import { requireAuth } from '@/lib/auth';
 import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 import { validate, projectSchema } from '@/lib/validation';
+import { deleteFromCloudinary, extractPublicId } from '@/lib/cloudinary';
 
 // GET all projects or filtered by limit (PUBLIC)
 export async function GET(request: NextRequest) {
@@ -166,9 +167,29 @@ export async function PUT(request: NextRequest) {
     const client = await clientPromise;
     const db = client.db('portfolio');
     
+    // If image is being updated, delete the old one from Cloudinary
+    if (validation.data?.image) {
+      const existingProject = await db.collection<Project>('projects').findOne({
+        _id: new (require('mongodb').ObjectId)(_id)
+      });
+      
+      if (existingProject && existingProject.image && existingProject.image !== validation.data.image) {
+        const oldPublicId = extractPublicId(existingProject.image);
+        if (oldPublicId) {
+          try {
+            await deleteFromCloudinary(oldPublicId);
+            console.log(`Deleted old image from Cloudinary: ${oldPublicId}`);
+          } catch (error) {
+            console.error('Error deleting old image from Cloudinary:', error);
+            // Continue with update even if Cloudinary delete fails
+          }
+        }
+      }
+    }
+    
     const result = await db.collection('projects').updateOne(
       { _id: new (require('mongodb').ObjectId)(_id) },
-      { $set: { ...validation.data, updatedAt: new Date() } }
+      { $set: { ...(validation.data || {}), updatedAt: new Date() } }
     );
     
     if (result.matchedCount === 0) {
@@ -222,16 +243,36 @@ export async function DELETE(request: NextRequest) {
     const client = await clientPromise;
     const db = client.db('portfolio');
     
-    const result = await db.collection('projects').deleteOne({
+    // Fetch the project first to get image URL for Cloudinary cleanup
+    const project = await db.collection<Project>('projects').findOne({
       _id: new (require('mongodb').ObjectId)(id)
     });
     
-    if (result.deletedCount === 0) {
+    if (!project) {
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
       );
     }
+    
+    // Delete image from Cloudinary if it exists
+    if (project.image) {
+      const publicId = extractPublicId(project.image);
+      if (publicId) {
+        try {
+          await deleteFromCloudinary(publicId);
+          console.log(`Deleted image from Cloudinary: ${publicId}`);
+        } catch (error) {
+          console.error('Error deleting from Cloudinary:', error);
+          // Continue with deletion even if Cloudinary fails
+        }
+      }
+    }
+    
+    // Delete project from database
+    const result = await db.collection('projects').deleteOne({
+      _id: new (require('mongodb').ObjectId)(id)
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {
