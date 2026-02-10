@@ -6,6 +6,7 @@ import { motion } from 'motion/react';
 import { Plus, Edit, Trash2, ArrowLeft, Save, X, ExternalLink, Github } from 'lucide-react';
 import Image from 'next/image';
 import { ImageUpload } from '@/app/components/ImageUpload';
+import { authenticatedFetch, isAuthenticated } from '@/lib/authClient';
 
 interface Project {
   _id?: string;
@@ -35,8 +36,7 @@ export default function AdminProjects() {
   });
 
   useEffect(() => {
-    const adminData = sessionStorage.getItem('admin');
-    if (!adminData) {
+    if (!isAuthenticated()) {
       router.push('/admin/login');
       return;
     }
@@ -63,10 +63,16 @@ export default function AdminProjects() {
     const url = editingId ? '/api/projects' : '/api/projects';
     const method = editingId ? 'PUT' : 'POST';
     
-    const payload = editingId ? { ...formData, _id: editingId } : formData;
+    // Ensure optional fields are empty strings, not undefined
+    const payload = {
+      ...formData,
+      githubUrl: formData.githubUrl || '',
+      liveUrl: formData.liveUrl || '',
+      ...(editingId && { _id: editingId })
+    };
 
     try {
-      const res = await fetch(url, {
+      const res = await authenticatedFetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -79,6 +85,12 @@ export default function AdminProjects() {
         setEditingId(null);
         resetForm();
         fetchProjects();
+      } else {
+        // Show validation errors if available
+        const errorMsg = data.details 
+          ? data.details.map((e: any) => `${e.field}: ${e.message}`).join('\n')
+          : data.error || 'Failed to save project';
+        alert(errorMsg);
       }
     } catch (error) {
       console.error('Error saving project:', error);
@@ -96,7 +108,7 @@ export default function AdminProjects() {
     if (!confirm('Are you sure you want to delete this project?')) return;
 
     try {
-      const res = await fetch(`/api/projects?id=${id}`, {
+      const res = await authenticatedFetch(`/api/projects?id=${id}`, {
         method: 'DELETE',
       });
 
@@ -200,7 +212,10 @@ export default function AdminProjects() {
                 <input
                   type="text"
                   value={formData.tags.join(', ')}
-                  onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()) })}
+                  onChange={(e) => setFormData({ 
+                    ...formData, 
+                    tags: e.target.value.split(',').map(t => t.trim()).filter(t => t.length > 0) 
+                  })}
                   placeholder="React, Node.js, MongoDB"
                   className="w-full bg-gray-700/50 border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:border-[#00b4d8]"
                   required

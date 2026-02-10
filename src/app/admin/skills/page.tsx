@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Plus, Edit, Trash2, ArrowLeft, Save, X, Code, Cpu, Wrench, Database } from 'lucide-react';
+import { authenticatedFetch, isAuthenticated } from '@/lib/authClient';
 
 interface Skill {
   name: string;
@@ -40,8 +41,7 @@ export default function AdminSkills() {
   const [skillInput, setSkillInput] = useState({ name: '', percentage: 50 });
 
   useEffect(() => {
-    const adminData = sessionStorage.getItem('admin');
-    if (!adminData) {
+    if (!isAuthenticated()) {
       router.push('/admin/login');
       return;
     }
@@ -69,7 +69,7 @@ export default function AdminSkills() {
     const payload = editingId ? { ...formData, _id: editingId } : formData;
 
     try {
-      const res = await fetch('/api/skills', {
+      const res = await authenticatedFetch('/api/skills', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -99,7 +99,7 @@ export default function AdminSkills() {
     if (!confirm('Are you sure you want to delete this skill category?')) return;
 
     try {
-      const res = await fetch(`/api/skills?id=${id}`, {
+      const res = await authenticatedFetch(`/api/skills?id=${id}`, {
         method: 'DELETE',
       });
 

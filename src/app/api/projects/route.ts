@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { Project } from '@/lib/types';
+import { requireAuth } from '@/lib/auth';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
+import { validate, projectSchema } from '@/lib/validation';
 
-// GET all projects or filtered by limit
+// GET all projects or filtered by limit (PUBLIC)
 export async function GET(request: NextRequest) {
   try {
+    // Rate limit public endpoints
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.publicRead);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     
@@ -41,30 +53,62 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// POST create new project
+// POST create new project (PROTECTED)
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    
+    // Validate input
+    const validation = validate(projectSchema, body);
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invalid input',
+          details: validation.errors?.issues.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        },
+        { status: 400 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     
-    const body = await request.json();
-    
     const newProject = {
-      ...body,
+      ...validation.data,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
     
-    // Remove _id if it exists to let MongoDB generate it
-    const { _id, ...projectData } = newProject;
-    
-    const result = await db.collection('projects').insertOne(projectData);
+    const result = await db.collection('projects').insertOne(newProject);
     
     return NextResponse.json({
       success: true,
       data: { _id: result.insertedId, ...newProject }
     }, { status: 201 });
   } catch (error) {
+    console.error('Error creating project:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to create project' },
       { status: 500 }
@@ -72,12 +116,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// PUT update project
+// PUT update project (PROTECTED)
 export async function PUT(request: NextRequest) {
   try {
-    const client = await clientPromise;
-    const db = client.db('portfolio');
-    
+    // Require authentication
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { _id, ...updateData } = body;
     
@@ -87,10 +146,29 @@ export async function PUT(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Validate input
+    const validation = validate(projectSchema, updateData);
+    if (!validation.success) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Invalid input',
+          details: validation.errors?.issues.map(e => ({
+            field: e.path.join('.'),
+            message: e.message
+          }))
+        },
+        { status: 400 }
+      );
+    }
+
+    const client = await clientPromise;
+    const db = client.db('portfolio');
     
     const result = await db.collection('projects').updateOne(
       { _id: new (require('mongodb').ObjectId)(_id) },
-      { $set: { ...updateData, updatedAt: new Date() } }
+      { $set: { ...validation.data, updatedAt: new Date() } }
     );
     
     if (result.matchedCount === 0) {
@@ -102,6 +180,7 @@ export async function PUT(request: NextRequest) {
     
     return NextResponse.json({ success: true, data: body });
   } catch (error) {
+    console.error('Error updating project:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to update project' },
       { status: 500 }
@@ -109,12 +188,27 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-// DELETE project
+// DELETE project (PROTECTED)
 export async function DELETE(request: NextRequest) {
   try {
-    const client = await clientPromise;
-    const db = client.db('portfolio');
-    
+    // Require authentication
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const id = searchParams.get('id');
     
@@ -124,6 +218,9 @@ export async function DELETE(request: NextRequest) {
         { status: 400 }
       );
     }
+    
+    const client = await clientPromise;
+    const db = client.db('portfolio');
     
     const result = await db.collection('projects').deleteOne({
       _id: new (require('mongodb').ObjectId)(id)
@@ -138,6 +235,7 @@ export async function DELETE(request: NextRequest) {
     
     return NextResponse.json({ success: true });
   } catch (error) {
+    console.error('Error deleting project:', error);
     return NextResponse.json(
       { success: false, error: 'Failed to delete project' },
       { status: 500 }

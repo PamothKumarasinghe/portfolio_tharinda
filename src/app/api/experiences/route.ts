@@ -1,10 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import clientPromise from '@/lib/mongodb';
 import { Experience } from '@/lib/types';
+import { requireAuth } from '@/lib/auth';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
+import { validate, experienceSchema } from '@/lib/validation';
 
 // GET all experiences
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Rate limit public reads
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.publicRead);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     
@@ -25,12 +37,40 @@ export async function GET() {
 // POST create new experience
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const authCheck = await requireAuth(request);
+    if (!authCheck.authorized) {
+      return NextResponse.json(
+        { success: false, error: authCheck.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     
     const body = await request.json();
+    const { _id, ...dataToValidate } = body;
     
-    const { _id, ...experienceData } = body;
+    // Validate input
+    const validation = validate(experienceSchema, dataToValidate);
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: validation.errors?.issues },
+        { status: 400 }
+      );
+    }
+
+    const experienceData = validation.data;
     
     const newExperience = {
       ...experienceData,
@@ -55,11 +95,40 @@ export async function POST(request: NextRequest) {
 // PUT update experience
 export async function PUT(request: NextRequest) {
   try {
+    // Require authentication
+    const authCheck = await requireAuth(request);
+    if (!authCheck.authorized) {
+      return NextResponse.json(
+        { success: false, error: authCheck.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     
     const body = await request.json();
-    const { _id, ...updateData } = body;
+    const { _id, ...dataToValidate } = body;
+    
+    // Validate input
+    const validation = validate(experienceSchema, dataToValidate);
+    if (!validation.success) {
+      return NextResponse.json(
+        { success: false, error: 'Validation failed', details: validation.errors?.issues },
+        { status: 400 }
+      );
+    }
+
+    const updateData = validation.data;
     
     if (!_id) {
       return NextResponse.json(
@@ -92,6 +161,24 @@ export async function PUT(request: NextRequest) {
 // DELETE experience
 export async function DELETE(request: NextRequest) {
   try {
+    // Require authentication
+    const authCheck = await requireAuth(request);
+    if (!authCheck.authorized) {
+      return NextResponse.json(
+        { success: false, error: authCheck.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const client = await clientPromise;
     const db = client.db('portfolio');
     

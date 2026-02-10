@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { authenticatedFetch } from '@/lib/authClient';
 
 interface ImageUploadProps {
   currentImage?: string;
@@ -40,7 +41,7 @@ export function ImageUpload({
       formData.append('file', file);
       formData.append('folder', folder);
 
-      const response = await fetch('/api/upload', {
+      const response = await authenticatedFetch('/api/upload', {
         method: 'POST',
         body: formData,
       });

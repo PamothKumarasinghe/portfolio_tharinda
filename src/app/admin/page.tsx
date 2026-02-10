@@ -10,17 +10,21 @@ export default function AdminDashboard() {
   const [admin, setAdmin] = useState<any>(null);
 
   useEffect(() => {
-    // Check if admin is logged in
-    const adminData = sessionStorage.getItem('admin');
-    if (!adminData) {
+    // Check if admin is logged in by verifying JWT token exists
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
       router.push('/admin/login');
     } else {
-      setAdmin(JSON.parse(adminData));
+      const adminUser = localStorage.getItem('admin_user');
+      if (adminUser) {
+        setAdmin(JSON.parse(adminUser));
+      }
     }
   }, [router]);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('admin');
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_user');
     router.push('/admin/login');
   };
 

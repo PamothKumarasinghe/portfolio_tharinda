@@ -28,9 +28,14 @@ export default function AdminLogin() {
 
       const data = await res.json();
 
-      if (data.success) {
-        // Store admin session (you can use a more secure method)
-        sessionStorage.setItem('admin', JSON.stringify(data.data));
+      if (data.success && data.token) {
+        // Store JWT token in localStorage
+        localStorage.setItem('admin_token', data.token);
+        // Store admin data (username, email) separately if needed
+        localStorage.setItem('admin_user', JSON.stringify({
+          username: data.user?.username,
+          email: data.user?.email
+        }));
         router.push('/admin');
       } else {
         setError(data.error || 'Login failed');

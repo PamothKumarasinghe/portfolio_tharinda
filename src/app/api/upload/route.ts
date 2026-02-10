@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/cloudinary';
+import { requireAuth } from '@/lib/auth';
+import { checkRateLimit, RATE_LIMITS } from '@/lib/rateLimit';
 
-// POST - Upload image
+// POST - Upload image (PROTECTED)
 export async function POST(request: NextRequest) {
   try {
+    // Require authentication
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit uploads
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.upload);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const folder = formData.get('folder') as string || 'portfolio';
@@ -56,9 +76,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// DELETE - Delete image
+// DELETE - Delete image (PROTECTED)
 export async function DELETE(request: NextRequest) {
   try {
+    // Require authentication
+    const auth = await requireAuth(request);
+    if (!auth.authorized) {
+      return NextResponse.json(
+        { success: false, error: auth.error },
+        { status: 401 }
+      );
+    }
+
+    // Rate limit
+    const rateLimit = checkRateLimit(request, RATE_LIMITS.api);
+    if (!rateLimit.allowed) {
+      return NextResponse.json(
+        { success: false, error: rateLimit.error },
+        { status: 429 }
+      );
+    }
+
     const { publicId } = await request.json();
 
     if (!publicId) {

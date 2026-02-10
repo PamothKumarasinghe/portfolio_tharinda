@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { Plus, Edit, Trash2, ArrowLeft, Save, X, Building2, MapPin, Calendar } from 'lucide-react';
+import { authenticatedFetch, isAuthenticated } from '@/lib/authClient';
 
 interface Experience {
   _id?: string;
@@ -31,8 +32,7 @@ export default function AdminExperience() {
   });
 
   useEffect(() => {
-    const adminData = sessionStorage.getItem('admin');
-    if (!adminData) {
+    if (!isAuthenticated()) {
       router.push('/admin/login');
       return;
     }
@@ -60,7 +60,7 @@ export default function AdminExperience() {
     const payload = editingId ? { ...formData, _id: editingId } : formData;
 
     try {
-      const res = await fetch('/api/experiences', {
+      const res = await authenticatedFetch('/api/experiences', {
         method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -90,7 +90,7 @@ export default function AdminExperience() {
     if (!confirm('Are you sure you want to delete this experience?')) return;
 
     try {
-      const res = await fetch(`/api/experiences?id=${id}`, {
+      const res = await authenticatedFetch(`/api/experiences?id=${id}`, {
         method: 'DELETE',
       });
 
