@@ -658,44 +658,17 @@ function SkillCategory({
         </div>
         <h3 className="text-xl sm:text-2xl font-bold">{title}</h3>
       </div>
-      <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
         {skills.map((skill, index) => (
-          <SkillBar key={skill.name} name={skill.name} percentage={skill.percentage} delay={delay + index * 0.1} />
+          <span 
+            key={skill.name}
+            className="bg-[#00b4d8]/10 text-gray-300 px-4 py-2 rounded-lg text-sm sm:text-base border border-[#00b4d8]/30 hover:bg-[#00b4d8]/20 transition-colors"
+          >
+            {skill.name}
+          </span>
         ))}
       </div>
     </motion.div>
-  );
-}
-
-// Animated Skill Bar Component
-function SkillBar({ name, percentage, delay }: { name: string; percentage: number; delay: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true });
-  const [width, setWidth] = useState(0);
-
-  useEffect(() => {
-    if (isInView) {
-      setTimeout(() => {
-        setWidth(percentage);
-      }, delay * 1000);
-    }
-  }, [isInView, percentage, delay]);
-
-  return (
-    <div ref={ref}>
-      <div className="flex justify-between mb-2">
-        <span className="text-sm sm:text-base text-gray-300">{name}</span>
-        <span className="text-sm sm:text-base text-gray-400">{percentage}%</span>
-      </div>
-      <div className="w-full bg-gray-700/30 rounded-full h-2 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: isInView ? `${width}%` : 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="bg-[#00b4d8] h-2 rounded-full"
-        />
-      </div>
-    </div>
   );
 }
 

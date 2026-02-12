@@ -118,23 +118,14 @@ function SkillCategoryCard({
         <h3 className="text-xl sm:text-2xl font-bold">{category.title}</h3>
       </div>
       
-      <div className="space-y-4">
+      <div className="flex flex-wrap gap-2">
         {category.skills.map((skill, index) => (
-          <div key={index}>
-            <div className="flex justify-between mb-2">
-              <span className="text-sm sm:text-base text-gray-300">{skill.name}</span>
-              <span className="text-sm sm:text-base text-[#00b4d8] font-semibold">{skill.percentage}%</span>
-            </div>
-            <div className="w-full bg-gray-700/50 rounded-full h-2 overflow-hidden">
-              <motion.div
-                initial={{ width: 0 }}
-                whileInView={{ width: `${skill.percentage}%` }}
-                transition={{ duration: 1, delay: 0.2 + index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-gradient-to-r from-[#00b4d8] to-[#0096c7] h-full rounded-full"
-              ></motion.div>
-            </div>
-          </div>
+          <span 
+            key={index}
+            className="bg-[#00b4d8]/10 text-gray-300 px-4 py-2 rounded-lg text-sm sm:text-base border border-[#00b4d8]/30 hover:bg-[#00b4d8]/20 transition-colors"
+          >
+            {skill.name}
+          </span>
         ))}
       </div>
     </motion.div>
