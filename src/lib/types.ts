@@ -78,3 +78,13 @@ export interface CVFile {
   fileUrl: string;
   uploadedAt: Date;
 }
+
+export interface Interest {
+  _id?: string;
+  title: string;
+  icon: string;
+  description: string;
+  order: number;
+  createdAt: Date;
+  updatedAt: Date;
+}

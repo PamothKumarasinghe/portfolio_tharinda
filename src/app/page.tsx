@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useAnimation } from 'motion/react';
 import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, User, Menu, X, ArrowRight, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { Project as ProjectType, SkillCategory as SkillCategoryType, Experience, Education } from '@/lib/types';
+import type { Project as ProjectType, SkillCategory as SkillCategoryType, Experience, Education, Interest } from '@/lib/types';
 import { StructuredData, personStructuredData, websiteStructuredData } from './components/StructuredData';
 
 export default function Page() {
@@ -18,6 +18,8 @@ export default function Page() {
   const [loadingExperiences, setLoadingExperiences] = useState(true);
   const [education, setEducation] = useState<Education[]>([]);
   const [loadingEducation, setLoadingEducation] = useState(true);
+  const [interests, setInterests] = useState<Interest[]>([]);
+  const [loadingInterests, setLoadingInterests] = useState(true);
 
   useEffect(() => {
     // Fetch recent 4 projects from API
@@ -81,10 +83,26 @@ export default function Page() {
       }
     };
 
+    // Fetch interests from API
+    const fetchInterests = async () => {
+      try {
+        const res = await fetch('/api/interests');
+        const data = await res.json();
+        if (data.success) {
+          setInterests(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch interests:', error);
+      } finally {
+        setLoadingInterests(false);
+      }
+    };
+
     fetchProjects();
     fetchSkills();
     fetchExperiences();
     fetchEducation();
+    fetchInterests();
   }, []);
 
 
@@ -127,6 +145,7 @@ export default function Page() {
             <button onClick={() => scrollToSection('projects')} className="text-gray-400 hover:text-white transition-colors">Projects</button>
             <button onClick={() => scrollToSection('experience')} className="text-gray-400 hover:text-white transition-colors">Experience</button>
             <button onClick={() => scrollToSection('education')} className="text-gray-400 hover:text-white transition-colors">Education</button>
+            <button onClick={() => scrollToSection('interests')} className="text-gray-400 hover:text-white transition-colors">Interests</button>
             <button onClick={() => scrollToSection('contact')} className="text-gray-400 hover:text-white transition-colors">Contact</button>
           </motion.div>
 
@@ -153,6 +172,7 @@ export default function Page() {
               <button onClick={() => scrollToSection('projects')} className="block w-full text-left text-gray-400 hover:text-white transition-colors py-2">Projects</button>
               <button onClick={() => scrollToSection('experience')} className="block w-full text-left text-gray-400 hover:text-white transition-colors py-2">Experience</button>
               <button onClick={() => scrollToSection('education')} className="block w-full text-left text-gray-400 hover:text-white transition-colors py-2">Education</button>
+              <button onClick={() => scrollToSection('interests')} className="block w-full text-left text-gray-400 hover:text-white transition-colors py-2">Interests</button>
               <button onClick={() => scrollToSection('contact')} className="block w-full text-left text-gray-400 hover:text-white transition-colors py-2">Contact</button>
             </div>
           </motion.div>
@@ -272,11 +292,8 @@ export default function Page() {
               viewport={{ once: true }}
             >
               <h3 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Electronic & Telecommunication Engineer</h3>
-              <p className="text-sm sm:text-base text-gray-400 mb-4 sm:mb-6 leading-relaxed">
-                I am a passionate Electronic and Telecommunication Engineering undergraduate at the University of Moratuwa, Sri Lanka. With a keen interest in embedded systems, signal processing, and innovative technology solutions, I strive to bridge the gap between theoretical knowledge and practical applications.
-              </p>
               <p className="text-sm sm:text-base text-gray-400 mb-6 sm:mb-8 leading-relaxed">
-                My academic journey has equipped me with strong analytical and problem-solving skills, and I am constantly exploring new technologies to expand my expertise. I believe in continuous learning and am always eager to take on challenging projects that push my boundaries.
+                I am a second-year undergraduate in Electronic and Telecommunication Engineering at the University of Moratuwa with hands-on experience in RTL and logic design, ASIC/FPGA implementation, RISC-V architectures, hardware accelerator design, IoT, embedded systems, and advanced PCB design. I am strongly motivated to contribute to cutting-edge research and product development in digital, embedded, and hardware systems.
               </p>
               
               <div className="flex flex-col gap-3 sm:gap-4">
@@ -499,6 +516,45 @@ export default function Page() {
         </div>
       </AnimatedSection>
 
+      {/* Interests Section */}
+      <AnimatedSection id="interests">
+        <div className="max-w-6xl w-full">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-center mb-4">
+              My <span className="text-[#00b4d8]">Interests</span>
+            </h2>
+            <div className="w-24 h-1 bg-[#00b4d8] mx-auto mb-12 sm:mb-16"></div>
+          </motion.div>
+          
+          {loadingInterests ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="w-12 h-12 border-4 border-[#00b4d8]/30 border-t-[#00b4d8] rounded-full animate-spin"></div>
+            </div>
+          ) : interests.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">No interests data available.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {interests.map((interest, index) => (
+                <InterestCard
+                  key={interest._id}
+                  icon={getIconComponent(interest.icon)}
+                  title={interest.title}
+                  description={interest.description}
+                  delay={0.1 + index * 0.1}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      </AnimatedSection>
+
       {/* Contact Section */}
       <AnimatedSection id="contact">
         <div className="max-w-6xl w-full">
@@ -618,6 +674,8 @@ function getIconComponent(iconName: string) {
     'Cpu': Cpu,
     'Wrench': Wrench,
     'Database': Database,
+    'Award': Award,
+    'User': User,
   };
   const IconComponent = icons[iconName] || Code;
   return <IconComponent size={24} className="text-[#00b4d8]" />;
@@ -668,6 +726,39 @@ function SkillCategory({
           </span>
         ))}
       </div>
+    </motion.div>
+  );
+}
+
+// Interest Card Component with Animation
+function InterestCard({ 
+  icon, 
+  title, 
+  description, 
+  delay 
+}: { 
+  icon: React.ReactNode; 
+  title: string; 
+  description: string; 
+  delay: number;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, delay }}
+      viewport={{ once: true }}
+      className="bg-gradient-to-br from-gray-800/30 to-gray-900/30 rounded-2xl p-6 sm:p-8 border border-gray-700/30 hover:border-[#00b4d8]/50 transition-all"
+    >
+      <div className="bg-[#00b4d8]/20 p-4 rounded-lg w-fit mb-4">
+        <div className="text-[#00b4d8]">
+          {React.cloneElement(icon as React.ReactElement, { size: 32 })}
+        </div>
+      </div>
+      <h3 className="text-xl sm:text-2xl font-bold mb-3">{title}</h3>
+      <p className="text-sm sm:text-base text-gray-400 leading-relaxed">
+        {description}
+      </p>
     </motion.div>
   );
 }
