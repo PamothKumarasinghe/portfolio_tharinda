@@ -7,6 +7,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { Project as ProjectType, SkillCategory as SkillCategoryType, Experience, Education, Interest } from '@/lib/types';
 import { StructuredData, personStructuredData, websiteStructuredData } from './components/StructuredData';
+import ElectricThunder from './components/ElectricThunder';
 
 export default function Page() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -181,9 +182,12 @@ export default function Page() {
 
       {/* Hero Section with Vignette */}
       <section className="min-h-screen flex items-center justify-center px-4 sm:px-6 pt-20 relative overflow-hidden">
+        {/* Electric Thunder Background Animation */}
+        <ElectricThunder />
+        
         {/* Vignette Gradient Background */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(circle at center, #1a3a52 0%, #0f2738 15%, #0a0e1a 40%)'
+        <div className="absolute inset-0 pointer-events-none z-[1]" style={{
+          background: 'radial-gradient(circle at center, rgba(26, 58, 82, 0.5) 0%, rgba(15, 39, 56, 0.7) 15%, rgba(10, 14, 26, 0.85) 40%)'
         }}></div>
         
         <div className="text-center max-w-4xl relative z-10">
