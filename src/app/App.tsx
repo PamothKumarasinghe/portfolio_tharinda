@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, useInView, useAnimation } from 'motion/react';
-import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, User, Menu, X, MessageCircle } from 'lucide-react';
+import { Download, Linkedin, Mail, MapPin, Code, Cpu, Wrench, Database, Github, ExternalLink, Calendar, Building2, GraduationCap, Award, User, Menu, X } from 'lucide-react';
 
 export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -483,16 +483,6 @@ export default function App() {
                 >
                   <Mail size={24} className="group-hover:scale-110 transition-transform" />
                   <span className="text-lg font-semibold">Send Email</span>
-                </a>
-                
-                <a
-                  href="https://wa.me/94743633248"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full bg-[#25D366] hover:bg-[#20BD5A] text-white px-6 sm:px-8 py-4 rounded-lg flex items-center justify-center gap-3 transition-colors group"
-                >
-                  <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
-                  <span className="text-lg font-semibold">WhatsApp Chat</span>
                 </a>
               </div>
               
